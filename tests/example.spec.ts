@@ -42,7 +42,7 @@ function saveAllResults() {
   }
 
   fs.writeFileSync(RESULTS_FILE, JSON.stringify(allTestResults, null, 2));
-  console.log(`✅ Todos los datos guardados en: ${RESULTS_FILE}`);
+  console.log(`✅ Todo s los datos guardados en: ${RESULTS_FILE}`);
 }
 
 /**
