@@ -1,10 +1,5 @@
 name: Ejecutar Playwright
 
-on:
-  workflow_dispatch:
-  schedule:
-    - cron: "0 7 * * *"
-
 permissions:
   contents: read
   pages: write
@@ -14,8 +9,13 @@ concurrency:
   group: "pages"
   cancel-in-progress: true
 
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 7 * * *"   # cada día a las 7:00 UTC
+
 jobs:
-  run-tests:
+  build:
     runs-on: ubuntu-latest
 
     steps:
@@ -37,7 +37,6 @@ jobs:
           USAL_PASSWORD: ${{ secrets.MI_SUPER_PASSWORD }}
         run: npx playwright test
 
-      # (Opcional) Mantener artefactos como ya tienes
       - name: Upload test results JSON
         if: always()
         uses: actions/upload-artifact@v4
@@ -54,49 +53,58 @@ jobs:
           path: playwright-report/
           retention-days: 30
 
-      # ✅ Preparar contenido para Pages
+      # 🔹 Prepara contenido para GitHub Pages
       - name: Prepare Pages content
         if: always()
         run: |
           mkdir -p public/test-results/extracted-data
-          cp test-results/extracted-data/all-results.json public/test-results/extracted-data/all-results.json
+          if [ -f test-results/extracted-data/all-results.json ]; then
+            cp test-results/extracted-data/all-results.json public/test-results/extracted-data/all-results.json
+          else
+            echo "No existe all-results.json; publicando placeholder"
+            echo '{}' > public/test-results/extracted-data/all-results.json
+          fi
 
-          # (Opcional) un index.html simple para navegar y ver el JSON
           cat > public/index.html <<'HTML'
           <!doctype html>
           <html lang="es">
-            <head>
-              <meta charset="utf-8" />
-              <meta name="viewport" content="width=device-width, initial-scale=1" />
-              <title>Resultados Playwright</title>
-            </head>
-            <body>
-              <h1>Resultados Playwright</h1>
-              <p>JSON:</p>
-              <ul>
-                <li><a href="./test-results/extracted-data/all-results.json">all-results.json</a></li>
-              </ul>
-              <p>Vista rápida:</p>
-              <pre id="out">Cargando…</pre>
-              <script>
-                fetch('./test-results/extracted-data/all-results.json')
-                  .then(r => r.json())
-                  .then(j => { document.getElementById('out').textContent = JSON.stringify(j, null, 2); })
-                  .catch(e => { document.getElementById('out').textContent = 'Error: ' + e; });
-              </script>
-            </body>
+          <head>
+            <meta charset="utf-8">
+            <title>Resultados Playwright</title>
+          </head>
+          <body>
+            <h1>Resultados Playwright</h1>
+            <ul>
+              <li><a href="./test-results/extracted-data/all-results.json">all-results.json</a></li>
+            </ul>
+            <pre id="out">Cargando…</pre>
+            <script>
+              fetch('./test-results/extracted-data/all-results.json')
+                .then(r => r.json())
+                .then(j => out.textContent = JSON.stringify(j, null, 2))
+                .catch(e => out.textContent = e.toString());
+            </script>
+          </body>
           </html>
           HTML
 
-      # ✅ Subir artefacto para Pages
+      # 🔹 Subir artefacto para Pages con nombre único
       - name: Upload Pages artifact
         if: always()
         uses: actions/upload-pages-artifact@v3
         with:
+          name: github-pages-${{ github.run_id }}
           path: public
 
-      # ✅ Desplegar en Pages
+  deploy:
+    if: always()
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+
+    steps:
       - name: Deploy to GitHub Pages
-        if: always()
-        id: deployment
         uses: actions/deploy-pages@v4
+        with:
+          artifact_name: github-pages-${{ github.run_id }}
