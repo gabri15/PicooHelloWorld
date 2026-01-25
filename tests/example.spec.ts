@@ -10,11 +10,15 @@ const RESEARCHER_ID = '57921';
 const RESULTS_DIR = path.join(process.cwd(), 'test-results', 'extracted-data');
 const RESULTS_FILE = path.join(RESULTS_DIR, 'all-results.json');
 const BASE_URL = 'https://produccioncientifica.usal.es';
+
 const CREDENTIALS = {
-  username: 'gvg',
-  password: 'changeme',
+  username: process.env.USAL_USERNAME ?? '',
+  password: process.env.USAL_PASSWORD ?? '',
 };
 
+if (!CREDENTIALS.username || !CREDENTIALS.password) {
+  throw new Error('Faltan credenciales en variables de entorno');
+}
 // Global storage for all test results
 let allTestResults = {
   timestamp: new Date().toISOString(),

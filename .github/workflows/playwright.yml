@@ -1,0 +1,29 @@
+name: Ejecutar Playwright
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 7 * * *"   # cada día a las 7:00 UTC
+
+jobs:
+  run-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+
+      - name: Run Playwright tests
+        env:
+          USAL_USERNAME: ${{ secrets.MI_SUPER_USERNAME }}
+          USAL_PASSWORD: ${{ secrets.MI_SUPER_PASSWORD }}
+        run: npx playwright test
