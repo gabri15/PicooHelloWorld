@@ -12,7 +12,7 @@ const RESULTS_FILE = path.join(RESULTS_DIR, 'all-results.json');
 const BASE_URL = 'https://produccioncientifica.usal.es';
 const CREDENTIALS = {
   username: 'gvg',
-  password: 'ostias25A#####',
+  password: 'changeme',
 };
 
 // Global storage for all test results
