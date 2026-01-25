@@ -3,7 +3,16 @@ name: Ejecutar Playwright
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 7 * * *"   # cada día a las 7:00 UTC
+    - cron: "0 7 * * *"
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
 
 jobs:
   run-tests:
@@ -28,6 +37,7 @@ jobs:
           USAL_PASSWORD: ${{ secrets.MI_SUPER_PASSWORD }}
         run: npx playwright test
 
+      # (Opcional) Mantener artefactos como ya tienes
       - name: Upload test results JSON
         if: always()
         uses: actions/upload-artifact@v4
@@ -43,3 +53,50 @@ jobs:
           name: playwright-report
           path: playwright-report/
           retention-days: 30
+
+      # ✅ Preparar contenido para Pages
+      - name: Prepare Pages content
+        if: always()
+        run: |
+          mkdir -p public/test-results/extracted-data
+          cp test-results/extracted-data/all-results.json public/test-results/extracted-data/all-results.json
+
+          # (Opcional) un index.html simple para navegar y ver el JSON
+          cat > public/index.html <<'HTML'
+          <!doctype html>
+          <html lang="es">
+            <head>
+              <meta charset="utf-8" />
+              <meta name="viewport" content="width=device-width, initial-scale=1" />
+              <title>Resultados Playwright</title>
+            </head>
+            <body>
+              <h1>Resultados Playwright</h1>
+              <p>JSON:</p>
+              <ul>
+                <li><a href="./test-results/extracted-data/all-results.json">all-results.json</a></li>
+              </ul>
+              <p>Vista rápida:</p>
+              <pre id="out">Cargando…</pre>
+              <script>
+                fetch('./test-results/extracted-data/all-results.json')
+                  .then(r => r.json())
+                  .then(j => { document.getElementById('out').textContent = JSON.stringify(j, null, 2); })
+                  .catch(e => { document.getElementById('out').textContent = 'Error: ' + e; });
+              </script>
+            </body>
+          </html>
+          HTML
+
+      # ✅ Subir artefacto para Pages
+      - name: Upload Pages artifact
+        if: always()
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
+
+      # ✅ Desplegar en Pages
+      - name: Deploy to GitHub Pages
+        if: always()
+        id: deployment
+        uses: actions/deploy-pages@v4
