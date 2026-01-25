@@ -24,6 +24,6 @@ jobs:
 
       - name: Run Playwright tests
         env:
-          USAL_USERNAME: ${{ secrets.MI_SUPER_USERNAME }}
+          USAL_USERNAME: ${{ secrets.MI_SUPER_USUARIO }}
           USAL_PASSWORD: ${{ secrets.MI_SUPER_PASSWORD }}
         run: npx playwright test
