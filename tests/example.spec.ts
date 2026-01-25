@@ -1,6 +1,8 @@
 import { test, expect, Page } from '@playwright/test';
 import * as fs from 'fs';
 import * as path from 'path';
+import 'dotenv/config';
+
 
 // ============================================================================
 // Constants
@@ -12,8 +14,8 @@ const RESULTS_FILE = path.join(RESULTS_DIR, 'all-results.json');
 const BASE_URL = 'https://produccioncientifica.usal.es';
 
 const CREDENTIALS = {
-  username: process.env.USAL_USERNAME ?? '',
-  password: process.env.USAL_PASSWORD ?? '',
+  username: process.env.USAL_USERNAME,
+  password: process.env.USAL_PASSWORD,
 };
 
 if (!CREDENTIALS.username || !CREDENTIALS.password) {
