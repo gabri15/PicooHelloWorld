@@ -12,7 +12,7 @@ concurrency:
 on:
   workflow_dispatch:
   schedule:
-    - cron: "52 12 * * *"   # cada día a las 11:50 UTC
+    - cron: "00 12 * * *"   # cada día a las 11:50 UTC
 
 jobs:
   build:
