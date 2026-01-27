@@ -14,7 +14,7 @@ on:
   push:                   # Ejecuta al hacer push (para probar ya)
     branches: ["main"]
   schedule:
-    - cron: "15 12 * * *"   # cada día a las 11:50 UTC
+    - cron: "55 17 * * *"   # cada día a las 11:50 UTC
 
 jobs:
   build:
