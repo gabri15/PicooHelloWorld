@@ -11,11 +11,14 @@ concurrency:
 
 on:
   schedule:
-    - cron: "10 18 * * *"   # cada día a las 11:50 UTC
-  workflow_dispatch:
-  push:                   # Ejecuta al hacer push (para probar ya)
+    # 18:00 UTC = 19:00 España (Invierno/Horario Estándar)
+    # 18:00 UTC = 20:00 España (Verano)
+    - cron: "0 18 * * *"
+  
+  workflow_dispatch: # Botón manual
+  
+  push:
     branches: ["main"]
- 
 
 jobs:
   build:
@@ -39,8 +42,6 @@ jobs:
           USAL_USERNAME: ${{ secrets.MI_SUPER_USUARIO }}
           USAL_PASSWORD: ${{ secrets.MI_SUPER_PASSWORD }}
         run: npx playwright test
-
-      
 
       # 🔹 Prepara contenido para GitHub Pages
       - name: Prepare Pages content
@@ -77,12 +78,11 @@ jobs:
           </html>
           HTML
 
-      # 🔹 Subir artefacto para Pages con nombre único
+      # 🔹 Subir artefacto para Pages (USANDO NOMBRE POR DEFECTO)
       - name: Upload Pages artifact
         if: always()
         uses: actions/upload-pages-artifact@v3
         with:
-          name: github-pages-${{ github.run_id }}
           path: public
 
   deploy:
@@ -91,9 +91,10 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
       - name: Deploy to GitHub Pages
+        id: deployment
         uses: actions/deploy-pages@v4
-        with:
-          artifact_name: github-pages-${{ github.run_id }}
+        # No especificamos artifact_name, usará el default que subió el paso anterior
