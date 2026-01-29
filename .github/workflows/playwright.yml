@@ -10,11 +10,12 @@ concurrency:
   cancel-in-progress: true
 
 on:
+  schedule:
+    - cron: "00 18 * * *"   # cada día a las 11:50 UTC
   workflow_dispatch:
   push:                   # Ejecuta al hacer push (para probar ya)
     branches: ["main"]
-  schedule:
-    - cron: "55 17 * * *"   # cada día a las 11:50 UTC
+ 
 
 jobs:
   build:
