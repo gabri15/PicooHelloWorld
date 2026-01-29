@@ -13,7 +13,7 @@ on:
   schedule:
     # 18:00 UTC = 19:00 España (Invierno/Horario Estándar)
     # 18:00 UTC = 20:00 España (Verano)
-    - cron: "22 18 * * *"
+    - cron: "59 23 * * *"
   
   workflow_dispatch: # Botón manual
   
