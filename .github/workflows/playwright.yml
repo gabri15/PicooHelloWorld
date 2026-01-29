@@ -11,7 +11,7 @@ concurrency:
 
 on:
   schedule:
-    - cron: "00 18 * * *"   # cada día a las 11:50 UTC
+    - cron: "10 18 * * *"   # cada día a las 11:50 UTC
   workflow_dispatch:
   push:                   # Ejecuta al hacer push (para probar ya)
     branches: ["main"]
